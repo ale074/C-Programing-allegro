@@ -1,0 +1,188 @@
+////////////////////////////////////////////////////////////////////
+/***+**********************************************************+***/
+/***+                                                          +***/
+/***+                 /////////////////////                    +***/
+/***+             ////////////////////////////                 +***/
+/***+          /////////////////////////////////               +***/
+/***+        ////////                    ////////              +***/
+/***+       ///////                                            +***/
+/***+      //////  Autor. Ing(c): Alejandro Vergara Álvarez    +***/
+/***+      //////               CC:1076352780                  +***/
+/***+      //////                 11-12-2020                   +***/
+/***+      //////                 Versión  1                   +***/
+/***+      //////          Compilador: gcc (DevC++)            +***/
+/***+      //////               Versión: 9.2.0                 +***/
+/***+      //////               Graficador UTP                 +***/
+/***+      ///////                                             +***/
+/***+       ///////                    /////////               +***/
+/***+        //////////////////////////////////                +***/
+/***+          //////////////////////////////                  +***/
+/***+              //////////////////////                      +***/
+/***+                                                          +***/
+/***+**********************************************************+***/
+////////////////////////////////////////////////////////////////////
+//////                                                        //////
+//////      Presentado a: PhD Ricardo Moreno Laverde          //////
+//////         Universidad_Tecnologica_de_Pereira             //////
+//////   Programa de Ingeniería de Sistemas y Computación     //////
+//////              IS284_Programacion_II_Gr._4               //////
+//////                    Trabajo Final                       //////
+//////                                                        //////
+////////////////////////////////////////////////////////////////////
+#include <allegro5/allegro.h>
+#include <allegro5/allegro_font.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
+
+void encontrarMenorArea(int tab[30][60],int size_x,int size_y){
+	//Define iteradores para recorrer la matriz
+	int i,j;
+	for(i=0;i<size_x;i++){
+		for(j=0;j<size_y;j++){
+			//Obtiene un numero aleatorio
+			int numero = rand() % 26;
+			//Si el numero aleatorio es igual a un numero a eleccion, en este caso es 3, pero puede cambiarse por cualquier numero menor a 26, ponemos un 1 que es un O
+			if(numero == 3){
+				tab[i][j] = 1;
+			}
+			//En caso contrario ponemos un 0, que es un punto
+			else{
+				tab[i][j] = 0;
+			}
+		}
+	}
+	/*
+		Se recorre la matriz con las variables i,j hasta encontrar un 1(el circulo "O"), si lo encuentra, sigue recorriendo la matriz por la direccion x, ahora con otro 
+		iterador k. Una vez encuente otro vertice en un punto k,j empieza a recorrer la matriz, ahora en la direccion y con el iterador l, hasta encontrar otro vertice. 
+		Una vez que encuentra el tercer vertice, que esta en la posicion k,l. En este punto ya tenemos 3 vertices: (i,j) (k,j) y (k,l), encontrar el ultimo vertice es tan
+		sencillo como buscar el elemento en (i,l), si este es 1, tendremos un rectangulo completo. Una vez tengamos un rectangulo completo, es hora de dibujarlo, para esto
+		rellenamos los espacios entre los vertices. Luego, se pregunta si la nueva area es menor que el area menor actual, si lo es, se reemplazan los vertices en variables
+		auxiliares y se guarda la nueva area menor
+	*/
+	//Iteradores para hacer barrido en fila (k) y columna(l)
+	int k,l;
+	//Variables auxiliares para almacenar el vertice con menor area actual
+	int i_aux,j_aux,k_aux,l_aux;
+	//Variable que contiene el area menor, inicialmente tiene el valor maximo, que seria un rectangulo de todo el tablero
+	int areaMenor = 60*30;
+	//Recorre la matriz con i,j buscando primer vertice
+	for(i=0;i<size_x;i++){
+		for(j=0;j<size_y;j++){
+			//Pregunta si el punto i,j es vertice
+			if(tab[i][j]==1){
+				//Si el vertice fue 1(O), se avanza con el iterador k, desde la posicion de i+1 buscando otro vertice en la misma fila
+				for(k=i+1;k<size_x;k++){
+					//Se pregunta si el punto k,j es vertice
+					if(tab[k][j]==1){
+						//Si es vertice, se avanza con el iterador l, desde la posicion j+1 buscando otro vertice en la misma columna
+						for(l=j+1;l<size_y;l++){
+							//Se pregunta si el punto k,l es vertice
+							if(tab[k][l]==1){
+								//Como ya se tienen 3 puntos, se pregunta por el ultimo punto en i,l
+								if(tab[i][l]==1){
+									//Si el ultimo tambien era un vertice, se hace lo siguiente:
+									//Se halla el area del rectangulo
+									int area = (k-i+1)*(l-j+1);
+									//a y b son iteradores auxiliares para rellenar los espacios.
+									int a,b=j;
+									//Se dibujan las X(2) hacia la derecha de i,j
+									for(a=i+1;a<k;a++){
+										if(tab[a][b]!=1){
+											tab[a][b] = 2;
+										}
+									}
+									b=l;
+									//Se rellenan ahora hacia la derecha de i,l
+									for(a=i+1;a<k;a++){
+										if(tab[a][b]!=1){
+											tab[a][b] = 2;
+										}
+									}
+									a=i;
+									//Ahora se rellena hacia abajo de i,j
+									for(b=j+1;b<l;b++){
+										if(tab[a][b]!=1){
+											tab[a][b] = 2;
+										}
+									}
+									a=k;
+									//Por ultimo se rellena hacia abajo de k,j
+									for(b=j+1;b<l;b++){
+										if(tab[a][b]!=1){
+											tab[a][b] = 2;
+										}
+									}
+									//Se pregunta si el area nueva es menor a la que ya esta almacenada como la menor
+									if(area<areaMenor){
+										//Se asigna la nueva area
+										areaMenor = area;
+										//Se asignan las posiciones de los vertices
+										i_aux = i;
+										j_aux = j;
+										k_aux = k;
+										l_aux = l;
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
+	for(i=0;i<size_x;i++){
+		for(j=0;j<size_y;j++){
+			if(tab[i][j]==0){
+				printf(".");
+			}
+			else if(tab[i][j]==1){
+				printf("O");
+			}
+			else if(tab[i][j]==2){
+				printf("X");
+			}
+		}
+		printf("\n");
+	}
+	
+	int done = 0;
+	al_init();
+	al_init_font_addon();
+	ALLEGRO_DISPLAY* display = al_create_display(600,400);
+	ALLEGRO_FONT* font = al_create_builtin_font();
+	al_clear_to_color(al_map_rgb(0,0,0));
+	while(!done){
+		for(i=0;i<size_x;i++){
+			for(j=0;j<size_y;j++){
+				if(tab[i][j]==0){
+					al_draw_text(font,al_map_rgb(255,255,255),i*10,j*10,ALLEGRO_ALIGN_CENTER,".");
+				}
+				else if(tab[i][j]==1){
+					al_draw_text(font,al_map_rgb(255,255,255),i*10,j*10,ALLEGRO_ALIGN_CENTER,"O");
+				}
+				else if(tab[i][j]==2){
+					al_draw_text(font,al_map_rgb(255,255,255),i*10,j*10,ALLEGRO_ALIGN_CENTER,"X");
+				}
+			}
+		}
+		char cadena[255];
+		itoa(areaMenor, cadena, 10);
+		al_draw_text(font, al_map_rgb(255,255,255),20,320,ALLEGRO_ALIGN_CENTER,strcat("El area del menor rectangulo es : ",cadena));
+		al_flip_display();
+		al_rest(10.0);
+		done = 1;
+	}
+	al_destroy_font(font);
+	al_destroy_display(display);
+}
+
+int main(){
+	int size_x = 30,size_y = 60;
+	int matriz[30][60];
+	encontrarMenorArea(matriz,size_x,size_y);
+	return 0;
+}
+
